@@ -43,6 +43,7 @@ class MethodMathsSession():
       
       self.first_name = None
       self.last_name = None
+      self.name = None
       self.school_name = None
       self.school_id = None
       self.account_type = None
@@ -59,6 +60,7 @@ class MethodMathsSession():
       
       self.first_name = d["FIRST0"]
       self.last_name = d["LAST0"]
+      self.name = self.first_name + " " + self.last_name
       self.school_name = d["SCHOOLNAME0"]
       self.school_id = d["UPN0"]
       self.account_type = d["ACCOUNTTYPE0"]
@@ -74,7 +76,7 @@ class MethodMathsSession():
       self.papers = []
       
       r = requests.post("https://www.methodmaths.com/gcse/loadResultsPageDataV7.php",data={"CENTRE":self.center,"USERID":self.userid})
-      d = parseString(r.text)
+      d = parseString(r.text.replace("+","%20"))
       e = {}
       for k in d.keys():
          if ("46" in k) and ("146" not in k) :
@@ -120,6 +122,7 @@ class MethodMathsQuestion():
       self.paper = pap
       self.name = qname
       self.number = int(qname.split("Q",1)[1])
+      self.id = str(pap.paper_id).strip() + "_" + str(int(qname.split("Q",1)[1])).strip()
       self.topic = topic
       self.marks_max = []
       self.marks_current = []
@@ -192,7 +195,7 @@ class MethodMathsPaper():
       
       
       for b in self.mark_bounds_raw.split("#"):
-         self.mark_bounds[b.split("*")[1]] = b.split("*")[1]
+         self.mark_bounds[b.split("*")[1]] = b.split("*")[0]
          
       for b in self.mark_max_raw.split("#"):
          for a in b.split("*"):
@@ -218,6 +221,12 @@ class MethodMathsPaper():
          except:
             pass
    
+   def getGrade(self):
+      lm = ""
+      for mbk in self.mark_bounds.keys():
+         mbv = self.mark_bounds[mbk]
+      return lm
+   
    def _compileData(self):
       ansList = []
       scoreList = []
@@ -237,4 +246,4 @@ class MethodMathsPaper():
       
 
       
-       
+         
